@@ -245,66 +245,81 @@ const CollaboratePage = () => {
             {/* Search Results */}
             {searchResults.length > 0 && (
               <div className="mt-6 space-y-4">
-                <h3 className="font-semibold">Search Results</h3>
-                <div className="grid gap-4">
+                <h3 className="font-semibold text-lg flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  <span>Search Results ({searchResults.length})</span>
+                </h3>
+                <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
                   {searchResults.map((user) => (
-                    <Card key={user.id} className="hover:shadow-soft transition-shadow">
+                    <Card key={user.id} className="hover:shadow-soft transition-all duration-200 hover:scale-[1.02] border-l-4 border-l-primary/20">
                       <CardContent className="pt-6">
-                        <div className="flex items-start justify-between">
+                        <div className="space-y-4">
                           <div className="flex items-start space-x-4">
-                            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                              <User className="h-6 w-6 text-primary" />
+                            <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl flex items-center justify-center">
+                              <User className="h-8 w-8 text-primary" />
                             </div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-lg">{user.name}</h4>
-                              <p className="text-muted-foreground text-sm mb-2">{user.bio}</p>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-xl text-foreground truncate">{user.name}</h4>
+                              <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{user.bio}</p>
                               
                               {user.location && (
-                                <div className="flex items-center space-x-1 text-sm text-muted-foreground mb-2">
-                                  <MapPin className="h-3 w-3" />
-                                  <span>{user.location}</span>
+                                <div className="flex items-center space-x-1 text-sm text-muted-foreground mt-2">
+                                  <MapPin className="h-4 w-4 flex-shrink-0" />
+                                  <span className="truncate">{user.location}</span>
                                 </div>
                               )}
-                              
-                              <div className="space-y-2">
-                                <div className="flex items-center space-x-2">
-                                  <Briefcase className="h-3 w-3 text-muted-foreground" />
-                                  <div className="flex flex-wrap gap-1">
-                                    {user.skills.map((skill, index) => (
-                                      <Badge key={index} variant="secondary" className="text-xs">
-                                        {skill}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                </div>
-                                
-                                {user.materials.length > 0 && (
-                                  <div className="flex flex-wrap gap-1">
-                                    {user.materials.map((material, index) => (
-                                      <Badge key={index} variant="outline" className="text-xs">
-                                        {material}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
                             </div>
                           </div>
                           
-                          <div className="flex space-x-2">
+                          <div className="space-y-3">
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Briefcase className="h-4 w-4 text-primary flex-shrink-0" />
+                                <span className="text-sm font-medium text-foreground">Skills:</span>
+                              </div>
+                              <div className="flex flex-wrap gap-2 pl-6">
+                                {user.skills.map((skill, index) => (
+                                  <Badge key={index} variant="default" className="text-xs bg-primary/10 text-primary hover:bg-primary/20">
+                                    {skill}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            {user.materials.length > 0 && (
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <div className="h-4 w-4 rounded-full bg-primary/20 flex-shrink-0"></div>
+                                  <span className="text-sm font-medium text-foreground">Materials:</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2 pl-6">
+                                  {user.materials.map((material, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs border-primary/30 text-muted-foreground">
+                                      {material}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex space-x-3 pt-2 border-t border-border/50">
                             <Button 
                               variant="outline" 
                               size="sm"
                               onClick={() => navigate(`/users/${user.id}`)}
+                              className="flex-1"
                             >
+                              <User className="h-4 w-4 mr-2" />
                               View Profile
                             </Button>
                             <Button 
                               size="sm"
                               onClick={() => sendCollaborationRequest(user.id)}
+                              className="flex-1 bg-primary hover:bg-primary/90"
                             >
-                              <MessageSquare className="h-4 w-4 mr-1" />
-                              Collaborate
+                              <MessageSquare className="h-4 w-4 mr-2" />
+                              Send Request
                             </Button>
                           </div>
                         </div>
