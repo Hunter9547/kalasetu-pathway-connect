@@ -12,8 +12,10 @@ import {
   Bell,
   Search,
   Plus,
-  ArrowRight
+  ArrowRight,
+  Users
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -54,10 +56,10 @@ const Dashboard = () => {
   ];
 
   const quickActions = [
-    { title: 'Find Mentors', description: 'Connect with industry experts', icon: User },
-    { title: 'Join Community', description: 'Network with entrepreneurs', icon: Users },
-    { title: 'Browse Courses', description: 'Enhance your skills', icon: GraduationCap },
-    { title: 'Funding Opportunities', description: 'Explore investment options', icon: DollarSign }
+    { title: 'Find Mentors', description: 'Connect with industry experts', icon: User, link: '/find-mentors' },
+    { title: 'Generate Ideas', description: 'AI-powered product suggestions', icon: Lightbulb, link: '/generate-idea' },
+    { title: 'Find Collaborators', description: 'Network with other artisans', icon: Users, link: '/collaborate' },
+    { title: 'AI Tools', description: 'Access powerful AI utilities', icon: GraduationCap, link: '/tools' }
   ];
 
   return (
@@ -167,21 +169,23 @@ const Dashboard = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {quickActions.map((action, index) => (
-                  <Card 
-                    key={action.title} 
-                    className="p-4 hover:shadow-soft transition-all duration-200 cursor-pointer group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <action.icon className="h-6 w-6 text-primary" />
-                        <div>
-                          <h4 className="font-semibold">{action.title}</h4>
-                          <p className="text-sm text-muted-foreground">{action.description}</p>
+                  <Link key={action.title} to={action.link}>
+                    <Card 
+                      key={action.title} 
+                      className="p-4 hover:shadow-soft transition-all duration-200 cursor-pointer group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <action.icon className="h-6 w-6 text-primary" />
+                          <div>
+                            <h4 className="font-semibold">{action.title}</h4>
+                            <p className="text-sm text-muted-foreground">{action.description}</p>
+                          </div>
                         </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                       </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                    </div>
-                  </Card>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             </CardContent>
@@ -226,7 +230,5 @@ const Dashboard = () => {
   );
 };
 
-// Import Users icon from lucide-react for the community action
-import { Users } from 'lucide-react';
 
 export default Dashboard;

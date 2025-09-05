@@ -14,6 +14,7 @@ import IdeaGeneratorPage from "./pages/IdeaGeneratorPage";
 import CollaboratePage from "./pages/CollaboratePage";
 import AIToolsPage from "./pages/AIToolsPage";
 import ForumPage from "./pages/ForumPage";
+import FindMentorsPage from "./pages/FindMentorsPage";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/collaborate" element={<CollaboratePage />} />
               <Route path="/tools" element={<AIToolsPage />} />
               <Route path="/forum" element={<ForumPage />} />
+              <Route path="/find-mentors" element={<FindMentorsPage />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />
