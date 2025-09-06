@@ -4,18 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { GraduationCap, Search, Loader2, Users, MapPin, Mail } from 'lucide-react';
-import { api } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { supabase, UserProfile } from '@/lib/supabase';
 
-interface Mentor {
-  uid: string;
-  name: string;
-  email: string;
-  location?: string;
-  skills: string[];
-  bio?: string;
-  role: string;
-}
+interface Mentor extends UserProfile {}
 
 const FindMentorsPage = () => {
   const [searchSkill, setSearchSkill] = useState('');
@@ -24,6 +17,7 @@ const FindMentorsPage = () => {
   const [requestingMentorship, setRequestingMentorship] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,9 +35,15 @@ const FindMentorsPage = () => {
     setSearched(true);
     
     try {
-      const response = await api.searchUsers(searchSkill);
-      // Filter only users with role: "mentor"
-      const mentorResults = response.results?.filter((user: Mentor) => user.role === 'mentor') || [];
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .ilike('skills', `%${searchSkill}%`)
+        .eq('role', 'mentor');
+
+      if (error) throw error;
+
+      const mentorResults = data || [];
       setMentors(mentorResults);
       
       if (mentorResults.length > 0) {
@@ -62,31 +62,37 @@ const FindMentorsPage = () => {
       // Mock data for demo purposes
       const mockMentors: Mentor[] = [
         {
-          uid: '1',
-          name: 'Sarah Kumar',
+          id: '1',
           email: 'sarah.kumar@example.com',
+          full_name: 'Sarah Kumar',
+          role: 'mentor',
           location: 'Mumbai, India',
           skills: ['Pottery', 'Ceramics', 'Business Strategy'],
           bio: 'Award-winning ceramic artist with 15+ years of experience. I help artisans scale their pottery businesses and develop unique glazing techniques.',
-          role: 'mentor'
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         },
         {
-          uid: '2',
-          name: 'Rajesh Patel',
+          id: '2',
           email: 'rajesh.patel@example.com',
+          full_name: 'Rajesh Patel',
+          role: 'mentor',
           location: 'Ahmedabad, Gujarat',
           skills: ['Textile Design', 'Block Printing', 'Marketing'],
           bio: 'Traditional block printing master and business mentor. I guide textile artisans in modern market strategies while preserving ancient techniques.',
-          role: 'mentor'
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         },
         {
-          uid: '3',
-          name: 'Maya Singh',
+          id: '3',
           email: 'maya.singh@example.com',
+          full_name: 'Maya Singh',
+          role: 'mentor',
           location: 'Jaipur, Rajasthan',
           skills: ['Jewelry Making', 'Silver Work', 'E-commerce'],
           bio: 'Master jeweler specializing in traditional Rajasthani silver work. I mentor artisans on online business development and quality standards.',
-          role: 'mentor'
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }
       ];
       setMentors(mockMentors);
@@ -95,15 +101,22 @@ const FindMentorsPage = () => {
     }
   };
 
-  const handleRequestMentorship = async (mentorUid: string, mentorName: string) => {
-    setRequestingMentorship(mentorUid);
+  const handleRequestMentorship = async (mentorId: string, mentorName: string) => {
+    setRequestingMentorship(mentorId);
     
     try {
-      await api.sendCollaborationRequest({
-        recipientId: mentorUid,
-        message: `Hi ${mentorName}, I would like to request your mentorship to help grow my craft and business. I believe your expertise would be invaluable to my journey as an artisan.`,
-        type: 'mentorship'
-      });
+      const { error } = await supabase
+        .from('mentorship_requests')
+        .insert([
+          {
+            mentor_id: mentorId,
+            artisan_id: user?.id,
+            message: `Hi ${mentorName}, I would like to request your mentorship to help grow my craft and business. I believe your expertise would be invaluable to my journey as an artisan.`,
+            status: 'pending'
+          }
+        ]);
+
+      if (error) throw error;
       
       toast({
         title: 'Mentorship Request Sent!',
@@ -181,14 +194,14 @@ const FindMentorsPage = () => {
             <h2 className="text-2xl font-bold">Available Mentors ({mentors.length})</h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {mentors.map((mentor) => (
-                <Card key={mentor.uid} className="shadow-soft hover:shadow-medium transition-shadow">
+                <Card key={mentor.id} className="shadow-soft hover:shadow-medium transition-shadow">
                   <CardHeader>
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
                         <GraduationCap className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <CardTitle className="text-lg">{mentor.name}</CardTitle>
+                        <CardTitle className="text-lg">{mentor.full_name}</CardTitle>
                         <div className="flex items-center text-sm text-muted-foreground mt-1">
                           <Mail className="h-3 w-3 mr-1" />
                           {mentor.email}
@@ -207,7 +220,7 @@ const FindMentorsPage = () => {
                     <div>
                       <h4 className="font-semibold mb-2 text-sm">Expertise</h4>
                       <div className="flex flex-wrap gap-1">
-                        {mentor.skills.map((skill, index) => (
+                        {mentor.skills?.map((skill, index) => (
                           <Badge key={index} variant="secondary" className="text-xs">
                             {skill}
                           </Badge>
@@ -225,12 +238,12 @@ const FindMentorsPage = () => {
                     )}
                     
                     <Button 
-                      onClick={() => handleRequestMentorship(mentor.uid, mentor.name)}
-                      disabled={requestingMentorship === mentor.uid}
+                      onClick={() => handleRequestMentorship(mentor.id, mentor.full_name)}
+                      disabled={requestingMentorship === mentor.id}
                       className="w-full"
                       variant="default"
                     >
-                      {requestingMentorship === mentor.uid ? (
+                      {requestingMentorship === mentor.id ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           Sending Request...

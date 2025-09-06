@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { 
   Home, 
   User, 
@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 const Layout = () => {
-  const { currentUser, logout } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -30,8 +30,8 @@ const Layout = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
-      navigate('/login');
+      await signOut();
+      navigate('/');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -78,7 +78,7 @@ const Layout = () => {
               </Button>
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-muted-foreground">
-                  {currentUser?.email}
+                  {user?.email}
                 </span>
                 <Button variant="ghost" size="icon" onClick={handleLogout}>
                   <LogOut className="h-4 w-4" />
